@@ -1,0 +1,14 @@
+__pycache__
+logs
+creds.json/*
+logs.zip
+temp/
+temp.txt
+env/
+actionPolicies/
+actionsUsers/
+crudActions/
+finalUserPolicies/
+userPolicies*/
+presentPolicies*/
+logs*/

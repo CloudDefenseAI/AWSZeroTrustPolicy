@@ -1,0 +1,6 @@
+{
+  "s3:HeadObject": "s3:GetObject",
+  "s3:HeadBucket": "s3:ListBucket",
+  "s3:ListObjects": "s3:ListBucket",
+  "s3:GetBucketReplication": "s3:GetReplicationConfiguration"
+}
