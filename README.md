@@ -58,7 +58,7 @@ curl -X POST -H "Content-Type: application/json" -d '{
     "accountId": "accountId",
     "days": 30,
     "bucketData": {
-        "us-east-1": "aws-cloudtrail-logs-407638845061-1f72c339"
+        "us-east-1": "aws-cloudtrail-logs-bucketid"
     }
 }' http://localhost:8000/run
 ```
