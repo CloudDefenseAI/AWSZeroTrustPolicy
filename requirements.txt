@@ -6,7 +6,6 @@ ijson==3.2.0.post0
 pendulum==2.1.2
 policy_sentry==0.12.6
 pydantic==1.10.6
-PyYAML==6.0
 redis==4.5.4
 tqdm==4.64.1
 uvicorn==0.21.1
