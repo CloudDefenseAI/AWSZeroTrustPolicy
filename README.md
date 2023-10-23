@@ -69,7 +69,7 @@ If you want to help and wish to contribute, please review our contribution guide
 
 ## License
 
-This extended rule set for Falco runtime security is released under the [Apache-2.0 License](url).
+This project is released under the [Apache-2.0 License]([url](https://github.com/CloudDefenseAI/AWSZeroTrustPolicy/blob/master/LICENSE)).
 
 ## Disclaimer:
 
