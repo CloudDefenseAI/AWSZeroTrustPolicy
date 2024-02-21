@@ -1,16 +1,18 @@
 from utils.colors import colors
-import os
 import datetime
 import calendar
+
 
 def fatal(message):
     assert type(message) == str
     print(colors.FAIL + message)
     exit(0)
 
+
 def logException(exp):
     print(exp)
     exit(0)
+
 
 def getTimings(num_days):
     today = datetime.datetime.now()
@@ -26,24 +28,24 @@ def getTimings(num_days):
     if num_days <= days_in_current_month - days_left_in_current_month:
         today = datetime.datetime.now()
         endDay = today - datetime.timedelta(days=1)
-        startDay = endDay - datetime.timedelta(days=num_days-1)
+        startDay = endDay - datetime.timedelta(days=num_days - 1)
         startMonth = startDay.strftime("%m")
         startYear = startDay.strftime("%Y")
         diff = (endDay.day - startDay.day) + 1
         return {
-                "sw1": {
+            "sw1": {
                 "start_day": startDay.day,
-                "target_month": startMonth,
                 "end_day": endDay.day,
+                "day_diff": diff,
+                "target_month": startMonth,
                 "year": startYear,
-                "day_diff": diff
             }
         }
     else:
         today = datetime.datetime.now()
         current_date = today - datetime.timedelta(days=1)
         current_month = current_date.strftime("%m")
-        previous_date = current_date - datetime.timedelta(days=num_days-1)
+        previous_date = current_date - datetime.timedelta(days=num_days - 1)
         previous_month = previous_date.strftime("%m")
         previous_year = previous_date.strftime("%Y")
         current_year = current_date.strftime("%Y")
@@ -57,19 +59,16 @@ def getTimings(num_days):
         return {
             "sw1": {
                 "start_day": prev_start_day,
-                "target_month": previous_month,
                 "end_day": prev_end_day,
+                "day_diff": prev_day_diff,
+                "target_month": previous_month,
                 "year": previous_year,
-                "day_diff": prev_day_diff
             },
             "sw2": {
                 "start_day": current_start_day,
-                "target_month": current_month,
                 "end_day": current_end_day,
+                "day_diff": current_day_diff,
+                "target_month": current_month,
                 "year": current_year,
-                "day_diff": current_day_diff
-            }
+            },
         }
-
-
-
