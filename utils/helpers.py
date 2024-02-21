@@ -35,10 +35,10 @@ def getTimings(num_days):
         return {
             "sw1": {
                 "start_day": startDay.day,
-                "target_month": startMonth,
                 "end_day": endDay.day,
-                "year": startYear,
                 "day_diff": diff,
+                "target_month": startMonth,
+                "year": startYear,
             }
         }
     else:
@@ -59,16 +59,16 @@ def getTimings(num_days):
         return {
             "sw1": {
                 "start_day": prev_start_day,
-                "target_month": previous_month,
                 "end_day": prev_end_day,
-                "year": previous_year,
                 "day_diff": prev_day_diff,
+                "target_month": previous_month,
+                "year": previous_year,
             },
             "sw2": {
                 "start_day": current_start_day,
-                "target_month": current_month,
                 "end_day": current_end_day,
-                "year": current_year,
                 "day_diff": current_day_diff,
+                "target_month": current_month,
+                "year": current_year,
             },
         }
