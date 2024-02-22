@@ -2,13 +2,15 @@ from aws.awsOps import AWSOperations
 import json
 from utils import helpers
 from utils.colors import colors
+
 # from constants import default_regions
 from tqdm import tqdm
 import os
 import time
+
 # from datetime import datetime
 import threading
-from aws.policygenOps import runPolicyGeneratorCRUD , generateLeastprivPolicies
+from aws.policygenOps import runPolicyGeneratorCRUD, generateLeastprivPolicies
 from redisops.redisOps import RedisOperations
 from aws.getPreviousPolicies import get_policies_for_users
 from aws.comparePolicies import compare_policies
@@ -25,6 +27,7 @@ completedBucketsLock = threading.Lock()
 utc_timezone = timezone("UTC")
 pendulum.set_local_timezone(utc_timezone)
 
+
 @contextmanager
 def measure_time_block(message: str = "Execution time"):
     start = time.time()
@@ -35,10 +38,14 @@ def measure_time_block(message: str = "Execution time"):
     if duration >= 3600:
         hours = int(duration // 3600)
         duration %= 3600
-        print(f"{message} completed in {hours} hour(s) {int(duration // 60)} minute(s) {duration % 60:.2f} second(s)")
+        print(
+            f"{message} completed in {hours} hour(s) {int(duration // 60)} minute(s) {duration % 60:.2f} second(s)"
+        )
     elif duration >= 60:
         minutes = int(duration // 60)
-        print(f"{message} completed in {minutes} minute(s) {duration % 60:.2f} second(s)")
+        print(
+            f"{message} completed in {minutes} minute(s) {duration % 60:.2f} second(s)"
+        )
     else:
         print(f"{message} completed in {duration:.2f} second(s)")
 
@@ -58,12 +65,17 @@ class s3Operations(AWSOperations):
     def mergeData(self, accountId, num_days, bucketData):
         print(f"Merging data for {num_days}")
         now = pendulum.now()
-        previousData = [(now - pendulum.duration(days=i)).strftime("%Y/%m/%d") for i in range(num_days)]
+        previousData = [
+            (now - pendulum.duration(days=i)).strftime("%Y/%m/%d")
+            for i in range(num_days)
+        ]
         merged_data = {}
 
         for bucketName, regions in bucketData.items():
             for region, date in itertools.product(regions, previousData):
-                day_data_str = self.crudConnection.read_json(f"{bucketName}_{accountId}_{date}_{region}")
+                day_data_str = self.crudConnection.read_json(
+                    f"{bucketName}_{accountId}_{date}_{region}"
+                )
                 if day_data_str:
                     for username, actions in day_data_str.items():
                         if username not in merged_data:
@@ -80,11 +92,11 @@ class s3Operations(AWSOperations):
         outer_key = f"{bucket_name}_{account_id}_{date}_{region}"
         return self.crudConnection.exists(outer_key)
 
-    def getObjects(self, completedBuckets, bucketData, num_days,unique_id):
+    def getObjects(self, completedBuckets, bucketData, num_days, unique_id):
         self.data_cleanup.cleanup()
         try:
             config = self.getConfig()
-            accountId = config['accountId']
+            accountId = config["accountId"]
             today = pendulum.now()
             endDay = today.date()
             startDay = today.subtract(days=num_days).date()
@@ -93,7 +105,19 @@ class s3Operations(AWSOperations):
 
             for bucketName, regions in bucketData.items():
 
-                thread = threading.Thread(target=bucketThreadFn, args=(completedBuckets, bucketName, regions, startDay, endDay, accountId, day_diff,unique_id))
+                thread = threading.Thread(
+                    target=bucketThreadFn,
+                    args=(
+                        completedBuckets,
+                        bucketName,
+                        regions,
+                        startDay,
+                        endDay,
+                        accountId,
+                        day_diff,
+                        unique_id,
+                    ),
+                )
                 thread.start()
 
         except KeyError as err:
@@ -102,11 +126,11 @@ class s3Operations(AWSOperations):
         except Exception as exp:
             helpers.logException(exp)
 
-    def getPolicies(self, account_id, num_days, bucketData,unique_id):
+    def getPolicies(self, account_id, num_days, bucketData, unique_id):
         user_policies_dir = f"userPolicies_{account_id}_{unique_id}"
         present_policies_dir = f"presentPolicies_{account_id}_{unique_id}"
 
-        mergedData = self.mergeData(account_id,num_days, bucketData)
+        mergedData = self.mergeData(account_id, num_days, bucketData)
         create_service_map(mergedData)
 
         with measure_time_block("Generating Policies"):
@@ -123,7 +147,17 @@ class s3Operations(AWSOperations):
         #     print("Comparing the policies to get excessive policies")
         #     compare_policies()
 
-def bucketThreadFn(completedBuckets, bucketName, regions, startDay, endDay, accountId, day_diff,unique_id):
+
+def bucketThreadFn(
+    completedBuckets,
+    bucketName,
+    regions,
+    startDay,
+    endDay,
+    accountId,
+    day_diff,
+    unique_id,
+):
     print("Started thread for Bucket : " + bucketName)
 
     s3Ops = s3Operations()
@@ -134,7 +168,18 @@ def bucketThreadFn(completedBuckets, bucketName, regions, startDay, endDay, acco
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         for idx, region in enumerate(regions):
-            executor.submit(regionThreadFn, startDay, endDay, accountId, region, s3Client, bucketName, completedRegions, region_events[idx],unique_id)
+            executor.submit(
+                regionThreadFn,
+                startDay,
+                endDay,
+                accountId,
+                region,
+                s3Client,
+                bucketName,
+                completedRegions,
+                region_events[idx],
+                unique_id,
+            )
 
     for event in region_events:
         event.wait()
@@ -144,7 +189,17 @@ def bucketThreadFn(completedBuckets, bucketName, regions, startDay, endDay, acco
     print(f"Completed thread for Bucket : {bucketName}")
 
 
-def regionThreadFn(startDay, endDay, accountId, region, s3Client, bucketName ,completedRegions,region_event,unique_id):
+def regionThreadFn(
+    startDay,
+    endDay,
+    accountId,
+    region,
+    s3Client,
+    bucketName,
+    completedRegions,
+    region_event,
+    unique_id,
+):
 
     print(f"Starting thread for {region}")
     completedDays = []
@@ -152,7 +207,18 @@ def regionThreadFn(startDay, endDay, accountId, region, s3Client, bucketName ,co
 
     day = startDay
     while day <= endDay:
-        thread = threading.Thread(target=dayThreadFn, args=(day, accountId, region, s3Client, bucketName,completedDays,unique_id))
+        thread = threading.Thread(
+            target=dayThreadFn,
+            args=(
+                day,
+                accountId,
+                region,
+                s3Client,
+                bucketName,
+                completedDays,
+                unique_id,
+            ),
+        )
         day_threads.append(thread)
         thread.start()
         day = day.add(days=1)
@@ -165,7 +231,7 @@ def regionThreadFn(startDay, endDay, accountId, region, s3Client, bucketName ,co
     region_event.set()
 
 
-def dayThreadFn(day, accountId, region, s3Client, bucketName, completedDays,unique_id):
+def dayThreadFn(day, accountId, region, s3Client, bucketName, completedDays, unique_id):
 
     date_str = day.strftime("%Y/%m/%d")
     s3obj = s3Operations()
@@ -179,15 +245,17 @@ def dayThreadFn(day, accountId, region, s3Client, bucketName, completedDays,uniq
         print(f"Starting thread for {region} : {day.format('YYYY/MM/DD')}")
         prefix = f"AWSLogs/{accountId}/CloudTrail/{region}/{day.format('YYYY/MM/DD')}"
         response = s3Client.list_objects(Bucket=bucketName, Prefix=prefix)
-        contents = response.get('Contents', [])
+        contents = response.get("Contents", [])
 
         total_items = len(contents)
         processed_items = 0
 
         for item in contents:
-            key = str(item['Key'])
-            filePath = key.split('/')[-1]
-            with open(os.path.join(f"logs_{accountId}_{unique_id}", filePath), "wb") as data:
+            key = str(item["Key"])
+            filePath = key.split("/")[-1]
+            with open(
+                os.path.join(f"logs_{accountId}_{unique_id}", filePath), "wb"
+            ) as data:
                 s3Client.download_fileobj(bucketName, key, data)
             downloaded = False
             retry_count = 0
@@ -195,7 +263,13 @@ def dayThreadFn(day, accountId, region, s3Client, bucketName, completedDays,uniq
 
             while not downloaded and retry_count < max_retries:
                 try:
-                    runPolicyGeneratorCRUD(f"logs_{accountId}_{unique_id}/{filePath}", f"{day.format('YYYY/MM/DD')}", region, accountId, bucketName)
+                    runPolicyGeneratorCRUD(
+                        f"logs_{accountId}_{unique_id}/{filePath}",
+                        f"{day.format('YYYY/MM/DD')}",
+                        region,
+                        accountId,
+                        bucketName,
+                    )
                     os.remove(f"logs_{accountId}_{unique_id}/{filePath}")
                     downloaded = True
                 except OSError as e:
@@ -205,17 +279,21 @@ def dayThreadFn(day, accountId, region, s3Client, bucketName, completedDays,uniq
                         retry_count += 1
                         time.sleep(1)
                 except Exception as e:
-                    print(f"Error in runPolicyGeneratorCRUD for {region} : {day.format('YYYY/MM/DD')}: {str(e)}")
+                    print(
+                        f"Error in runPolicyGeneratorCRUD for {region} : {day.format('YYYY/MM/DD')}: {str(e)}"
+                    )
                     retry_count += 1
                     time.sleep(1)
 
             processed_items += 1
-            print(f"Processed {processed_items}/{total_items} items for {region} : {day.format('YYYY/MM/DD')}")
+            print(
+                f"Processed {processed_items}/{total_items} items for {region} : {day.format('YYYY/MM/DD')}"
+            )
 
         print(f"Completed thread for {region} : {day.format('YYYY/MM/DD')}")
         completedDays.append(day)
 
     except Exception as e:
-        print(f"Error in dayThreadFn for {region} : {day.format('YYYY/MM/DD')}: {str(e)}")
-
-
+        print(
+            f"Error in dayThreadFn for {region} : {day.format('YYYY/MM/DD')}: {str(e)}"
+        )

@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Dict
 
+
 class Script(BaseModel):
     accountType: str
     accessKey: str

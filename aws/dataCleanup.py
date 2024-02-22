@@ -1,5 +1,6 @@
 import pendulum
 
+
 class DataCleanup:
     def __init__(self, redis_connection):
         self.redis_connection = redis_connection
