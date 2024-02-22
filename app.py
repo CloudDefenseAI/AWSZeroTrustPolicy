@@ -7,6 +7,7 @@ from datetime import datetime
 
 app = FastAPI()
 
+
 @app.post("/run")
 def run_script(script: Script):
     print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -14,10 +15,22 @@ def run_script(script: Script):
     print(json.dumps(script.dict(), indent=4))
 
     try:
-        resp = runner(script.accountType, script.accessKey, script.secretKey, script.accountId, script.days
-                      , script.bucketData, script.roleArn, script.externalId)
+        resp = runner(
+            script.accountType,
+            script.accessKey,
+            script.secretKey,
+            script.accountId,
+            script.days,
+            script.bucketData,
+            script.roleArn,
+            script.externalId,
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"accountId": resp['accountId'], "generatedPolicies": resp['generatedPolicies'], "consolidatedPolicies": resp['consolidatedPolicies'], "excessivePolicies": resp['excessivePolicies']}
-
+    return {
+        "accountId": resp["accountId"],
+        "generatedPolicies": resp["generatedPolicies"],
+        "consolidatedPolicies": resp["consolidatedPolicies"],
+        "excessivePolicies": resp["excessivePolicies"],
+    }

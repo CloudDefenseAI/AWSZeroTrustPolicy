@@ -10,3 +10,4 @@ redis==4.5.4
 tqdm==4.64.1
 uvicorn==0.21.1
 mangum==0.17.0
+

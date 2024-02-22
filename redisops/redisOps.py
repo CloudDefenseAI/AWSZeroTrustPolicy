@@ -1,24 +1,25 @@
 import redis
 import json
 
+
 class RedisOperations:
-    def connect(self,host,port,dbNum):
-        self.r = redis.Redis(host=host,port=port,db=dbNum)
+    def connect(self, host, port, dbNum):
+        self.r = redis.Redis(host=host, port=port, db=dbNum)
 
-    def insertKeyVal(self,key,value):
-        self.r.set(key,value)
+    def insertKeyVal(self, key, value):
+        self.r.set(key, value)
 
-    def createList(self,key,value_list):
+    def createList(self, key, value_list):
         for item in value_list:
-            self.r.rpush(key,item)
+            self.r.rpush(key, item)
 
     # insert a value at the end of a list
-    def push_back(self,key,value):
-        self.r.rpush(key,value)
+    def push_back(self, key, value):
+        self.r.rpush(key, value)
 
     # insert a value at the front of a list
-    def push_front(self,key,value):
-        self.r.lpush(key,value)
+    def push_front(self, key, value):
+        self.r.lpush(key, value)
 
     def push_back_json(self, key, jsonObj):
         jsonStr = json.dumps(jsonObj)
@@ -26,14 +27,14 @@ class RedisOperations:
         if pos == None:
             self.r.rpush(key, jsonStr)
 
-    def pop_back(self,key):
+    def pop_back(self, key):
         self.r.rpop(key)
 
-    def pop_front(self,key):
+    def pop_front(self, key):
         self.r.lpop(key)
 
-    def insert_json(self,key,json_object):
-        self.r.set(key,json.dumps(json_object))
+    def insert_json(self, key, json_object):
+        self.r.set(key, json.dumps(json_object))
 
     def read_json(self, key):
         val = self.r.get(key)
@@ -41,18 +42,18 @@ class RedisOperations:
             return json.loads(val.decode())
         return None
 
-    def insert_jsonobj_list(self,key,listOfJsonObjects):
+    def insert_jsonobj_list(self, key, listOfJsonObjects):
         for jsonObject in listOfJsonObjects:
-            self.push_back(key,json.dumps(jsonObject))
+            self.push_back(key, json.dumps(jsonObject))
 
-    def get_list_items(self,key):
-        items = self.r.lrange(key,0,-1)
+    def get_list_items(self, key):
+        items = self.r.lrange(key, 0, -1)
         return items
 
     def get_all_keys(self):
         return self.r.scan_iter()
 
-     # flush all keys from current DB
+    # flush all keys from current DB
     def flushdb(self):
         self.r.flushdb()
 
